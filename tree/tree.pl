@@ -13,9 +13,12 @@ foreach (1..8) {
 my ($recorder, $reporter) = aggregator();
 $tree->traverse($recorder);
 my @results = $reporter->();
+
 for (@results) {
+    #print Dumper $_;
     print $_->val, "\n";
 }
+#print Dumper $tree;
 
 sub aggregator {
     my @list;

@@ -1,5 +1,6 @@
 package BinaryTree;
 use Moose;
+use Data::Dumper;
 
 has 'parent' => (
     is  => 'rw',
@@ -32,10 +33,7 @@ has 'val' => (
     predicate => 'has_val',
 );
 
-has 'height' => (
-    is  => 'rw',
-    isa => 'Num',
-);
+with 'Role::Balanced';
 
 sub find {
     my $tree = shift;
@@ -62,14 +60,13 @@ sub add {
     my $tree = shift;
     my ($val, $cmp) = @_;
     my $node;
-    if (not $tree->has_val) {
+    unless ($tree->has_val) {
         $node = BinaryTree->new(val => $val);
         return ($node, $node);
     }
-
     my $relation = defined $cmp
-        ? $cmp->($tree->val, $val)
-        : $tree->val <=> $val;
+        ? $cmp->($val, $tree->val)
+        : $val <=> $tree->val;
 
     return ($tree, $node) if $relation == 0;
 
@@ -117,7 +114,6 @@ sub delete {
     return ($tree, $node);
 }
 
-
 # to join sub trees together
 sub tree_join {
     my ($left, $right) = @_;
@@ -126,7 +122,7 @@ sub tree_join {
     return $right unless $left->has_val();
 
     my $top;
-    if ($left->height > $r->height) {
+    if ($left->height > $right->height) {
         $top = $left;
         $top->right(tree_join($top->right, $right));
     } else {
