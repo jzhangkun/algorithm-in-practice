@@ -109,7 +109,7 @@ sub delete {
     } else {
         # delete
         $node = $tree;
-        $tree = $tree->join($tree->left, $tree->right);
+        $tree = tree_join($tree->left, $tree->right);
         $node->clr_left();
         $node->clr_right();
     }
@@ -117,17 +117,23 @@ sub delete {
     return ($tree, $node);
 }
 
-# to balance the tree
-sub balance {
-    my $tree = shift;
-    
-    return $tree;
-}
 
 # to join sub trees together
-sub join {
-    my $tree = shift;
+sub tree_join {
+    my ($left, $right) = @_;
 
+    return $left unless $right->has_val();
+    return $right unless $left->has_val();
+
+    my $top;
+    if ($left->height > $r->height) {
+        $top = $left;
+        $top->right(tree_join($top->right, $right));
+    } else {
+        $top = $right;
+        $top->left(tree_join($left, $top->left));
+    }
+    return $top->balance;
 }
 
 
