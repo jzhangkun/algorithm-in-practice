@@ -31,10 +31,10 @@ subtest 'add child' => sub {
     my $tree = _build_simple_tree();
     my ($new, $node) = $tree->add(1);
     my $ll = $new->left->left;
-    is_deeply($ll, BinaryTree->new(val => 1), 'left child');
+    is($ll->val, 1, 'left child');
     ($new, $node) = $new->add(3);
     my $lr = $new->left->right;
-    is_deeply($lr, BinaryTree->new(val => 3), 'right child');
+    is($lr->val, 3, 'right child');
 };
 
 subtest 'add with function' => sub {
@@ -42,7 +42,7 @@ subtest 'add with function' => sub {
     my $func = sub { $_[1] <=> $_[0] };
     my ($new, $node) = $tree->add(1, $func);
     my $rr = $new->right->right;
-    is_deeply($rr, BinaryTree->new(val => 1), 'desc function');
+    is_deeply($rr->val, 1, 'desc function');
 };
 
 exit 0;

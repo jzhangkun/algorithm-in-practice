@@ -2,20 +2,18 @@ package BinaryTree;
 use Moose;
 use Data::Dumper;
 
-=disbale_parent
 has 'parent' => (
     is  => 'rw',
     isa => 'BinaryTree',
     predicate => 'has_parent',
     weak_ref  => 1,
 );
-=cut
 
 has 'left' => (
     is  => 'rw',
     isa => 'BinaryTree',
     lazy => 1,
-    default => sub { BinaryTree->new() },
+    default => sub { BinaryTree->new(parent => $_[0]) },
     predicate => 'has_left',
     clearer   => 'clr_left',
 );
@@ -24,7 +22,7 @@ has 'right' => (
     is  => 'rw',
     isa => 'BinaryTree',
     lazy => 1,
-    default => sub { BinaryTree->new() },
+    default => sub { BinaryTree->new(parent => $_[0]) },
     predicate => 'has_right',
     clearer   => 'clr_right',
 );
@@ -36,6 +34,12 @@ has 'val' => (
 );
 
 with 'Role::Balanced';
+
+before 'right', 'left' => sub {
+    my ($tree, $child) = @_;
+    # only available for set operation
+    $child->parent($tree) if defined $child;
+};
 
 sub find {
     my $tree = shift;
