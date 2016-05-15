@@ -17,7 +17,7 @@ sub balance {
     my $rh = $tree->has_right ? $tree->right->height : 0;
 
     if ($lh > 1 + $rh) {
-        my $return = tree->swing_right;
+        my $return = $tree->swing_right;
         return $tree->swing_right;
     }
     elsif ($lh + 1 < $rh) {

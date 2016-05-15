@@ -2,18 +2,20 @@ package BinaryTree;
 use Moose;
 use Data::Dumper;
 
+=disbale_parent
 has 'parent' => (
     is  => 'rw',
     isa => 'BinaryTree',
     predicate => 'has_parent',
     weak_ref  => 1,
 );
+=cut
 
 has 'left' => (
     is  => 'rw',
     isa => 'BinaryTree',
     lazy => 1,
-    default => sub { BinaryTree->new(parent => $_[0]) },
+    default => sub { BinaryTree->new() },
     predicate => 'has_left',
     clearer   => 'clr_left',
 );
@@ -22,7 +24,7 @@ has 'right' => (
     is  => 'rw',
     isa => 'BinaryTree',
     lazy => 1,
-    default => sub { BinaryTree->new(parent => $_[0]) },
+    default => sub { BinaryTree->new() },
     predicate => 'has_right',
     clearer   => 'clr_right',
 );
@@ -40,8 +42,8 @@ sub find {
     my ($val, $cmp) = @_;
     while ($tree->has_val) {
         my $relation = defined $cmp
-            ? $cmp->($tree->val, $val)
-            : $tree->val <=> $val;
+            ? $cmp->($val, $tree->val)
+            : $val <=> $tree->val;
         return $tree if $relation == 0;
         $tree = $relation < 0 ? $tree->left : $tree->right;
     }
@@ -52,13 +54,14 @@ sub traverse {
     my $tree = shift;
     my $func = shift || sub { print shift->val(), qq{\n} };
     $tree->left->traverse($func)  if $tree->has_left;
-    $func->($tree);
+    $func->($tree) if $tree->has_val;
     $tree->right->traverse($func) if $tree->has_right;
 }
 
 sub add {
     my $tree = shift;
     my ($val, $cmp) = @_;
+    return ($tree, undef) unless $val;
     my $node;
     unless ($tree->has_val) {
         $node = BinaryTree->new(val => $val);
@@ -88,20 +91,25 @@ sub delete {
     my ($val, $cmp) = @_;
     my $node;
 
+    return ($tree, undef) unless defined $val && $tree->has_val;
     my $relation = defined $cmp
-        ? $cmp->($tree->val, $val)
-        : $tree->val <=> $val;
+        ? $cmp->($val, $tree->val)
+        : $val <=> $tree->val;
 
     if ($relation != 0) {
         if ($relation < 0) {
-            my $left;
-            ($left, $node) = $tree->left->delete($val, $cmp);
-            $tree->left($left);
+            if ($tree->has_left) {
+                my $left;
+                ($left, $node) = $tree->left->delete($val, $cmp);
+                $tree->left($left);
+            }
         } else {
-            my $right;
-            ($right, $node) = $tree->right->delete($val, $cmp);
-            $tree->right($right);
-        } 
+            if ($tree->has_right) {
+                my $right;
+                ($right, $node) = $tree->right->delete($val, $cmp);
+                $tree->right($right);
+            }
+        }
         return ($tree, undef) unless $node;
     } else {
         # delete
@@ -118,8 +126,8 @@ sub delete {
 sub tree_join {
     my ($left, $right) = @_;
 
-    return $left unless $right->has_val();
-    return $right unless $left->has_val();
+    return $left unless $left->has_val();
+    return $right unless $right->has_val();
 
     my $top;
     if ($left->height > $right->height) {
