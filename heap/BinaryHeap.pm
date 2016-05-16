@@ -55,4 +55,17 @@ sub heapify {
     }
 }
 
+sub extract_top {
+    my ($ra, $last) = @_;
+    $last = $#{$ra} unless defined $last;
+    # empty array
+    return undef if $last < 0;
+    # only one in array
+    return pop(@$ra) unless $last;
+    my $value = $ra->[0];
+    $ra->[0] = pop(@$ra);
+    heapdown($ra,0);
+    return $value;
+}
+
 1;
